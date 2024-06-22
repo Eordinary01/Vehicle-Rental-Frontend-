@@ -1,29 +1,34 @@
-'use client'
 // AuthContext.js
+'use client'
 import { createContext, useContext, useState, useEffect } from 'react';
-import jwt from 'jsonwebtoken'; // Import jwt from jsonwebtoken package
+import jwt from 'jsonwebtoken';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [user, setUser] = useState(null); // Add user state
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
     if (token) {
       const decodedToken = jwt.decode(token);
-      setUser({ id: decodedToken.id, role: decodedToken.role });
-      setIsLoggedIn(true);
-      setIsAdmin(role === "admin");
+      if (decodedToken.exp * 1000 < Date.now()) {
+        logout();
+        window.location.href = '/auth/login';
+      } else {
+        setUser({ id: decodedToken.id, role: decodedToken.role });
+        setIsLoggedIn(true);
+        setIsAdmin(role === "admin");
+      }
     }
   }, []);
 
   const login = (token, role) => {
     try {
-      const decodedToken = jwt.decode(token); // Decode the token
+      const decodedToken = jwt.decode(token);
       setUser({ id: decodedToken.id, role: decodedToken.role });
       localStorage.setItem('token', token);
       localStorage.setItem('role', role);
@@ -50,5 +55,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-
-

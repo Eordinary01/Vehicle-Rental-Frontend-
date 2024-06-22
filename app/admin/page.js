@@ -5,7 +5,7 @@ import { useAuth } from "../context/authContext";
 import VehicleModal from "../components/VehicleModal";
 import VehicleCard from "../components/VehicleCard";
 import Toast from "../components/Toast";
-import { Oval } from 'react-loader-spinner'; // Import the loader
+import { Oval } from "react-loader-spinner";
 
 const AdminDashboard = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -15,13 +15,16 @@ const AdminDashboard = () => {
     image: "",
     pricePerDay: "",
     available: true,
+    wheelCount: "",
+    description: "",
+    features: "",
   });
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
   const [toastType, setToastType] = useState("success");
   const [loading, setLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true); // New state to handle fetching status
+  const [isFetching, setIsFetching] = useState(true);
   const { isLoggedIn, isAdmin } = useAuth();
 
   const fetchVehicles = async () => {
@@ -31,7 +34,7 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error(err);
     } finally {
-      setIsFetching(false); // Set fetching status to false after fetching is done
+      setIsFetching(false);
     }
   };
 
@@ -47,14 +50,21 @@ const AdminDashboard = () => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
       ...prevFormData,
-      [name]: value.toUpperCase(), // Convert value to uppercase
+      [name]:
+        name === "wheelCount" ? parseInt(value) :
+        name === "pricePerDay" ? parseFloat(value) :
+        name === "features" ? value.split(",").map((item) => item.trim()) :
+        name === "available" ? value === "true" :
+        value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isLoggedIn || !isAdmin) {
-      console.error("You must be an authenticated admin to perform this action.");
+      console.error(
+        "You must be an authenticated admin to perform this action."
+      );
       return;
     }
 
@@ -74,15 +84,18 @@ const AdminDashboard = () => {
         image: "",
         pricePerDay: "",
         available: true,
+        wheelCount: "",
+        description: "",
+        features: "",
       });
-      fetchVehicles(); // Refresh the vehicle list
+      fetchVehicles();
     } catch (err) {
       console.error("Error adding vehicle:", err);
       setToastType("error");
       setResponseMessage("Error adding vehicle");
     } finally {
       setLoading(false);
-      setTimeout(() => setResponseMessage(""), 3000); // Clear the message after 3 seconds
+      setTimeout(() => setResponseMessage(""), 3000);
     }
   };
 
@@ -96,7 +109,7 @@ const AdminDashboard = () => {
       console.error("You must be an authenticated admin to perform this action.");
       return;
     }
-
+  
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -104,18 +117,45 @@ const AdminDashboard = () => {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       };
-      await API.put(`/vehicles/${updatedVehicle._id}`, updatedVehicle, { headers });
+      
+      // Prepare the vehicle data for update
+      const vehicleToUpdate = {
+        ...updatedVehicle,
+        features: Array.isArray(updatedVehicle.features) 
+          ? updatedVehicle.features
+          : updatedVehicle.features.split(',').map(item => item.trim()),
+        available: updatedVehicle.available === "true" || updatedVehicle.available === true,
+        pricePerDay: Number(updatedVehicle.pricePerDay),
+        wheelCount: Number(updatedVehicle.wheelCount)
+      };
+  
+      // Log the data being sent to the server
+      console.log("Sending update:", vehicleToUpdate);
+  
+      const response = await API.put(`/vehicles/${updatedVehicle._id}`, vehicleToUpdate, {
+        headers,
+      });
+  
+      // Log the server response
+      console.log("Server response:", response.data);
+  
       setToastType("success");
       setResponseMessage("Vehicle updated successfully");
       setIsModalOpen(false);
-      fetchVehicles(); // Refresh the vehicle list
+      fetchVehicles();
     } catch (err) {
       console.error("Error updating vehicle:", err);
+      // Log more details about the error
+      if (err.response) {
+        console.error("Response data:", err.response.data);
+        console.error("Response status:", err.response.status);
+        console.error("Response headers:", err.response.headers);
+      }
       setToastType("error");
       setResponseMessage("Error updating vehicle");
     } finally {
       setLoading(false);
-      setTimeout(() => setResponseMessage(""), 3000); // Clear the message after 3 seconds
+      setTimeout(() => setResponseMessage(""), 3000);
     }
   };
 
@@ -143,7 +183,7 @@ const AdminDashboard = () => {
             wrapperStyle={{}}
             wrapperClass=""
             visible={true}
-            ariaLabel='oval-loading'
+            ariaLabel="oval-loading"
             secondaryColor="#FFD580"
             strokeWidth={2}
             strokeWidthSecondary={2}
@@ -151,7 +191,10 @@ const AdminDashboard = () => {
         </div>
       ) : (
         <>
-          <form onSubmit={handleSubmit} className="bg-gray-800 p-12 rounded-lg shadow-lg max-w-lg mx-auto mb-8">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-gray-800 p-12 rounded-lg shadow-lg max-w-lg mx-auto mb-8"
+          >
             <h2 className="text-2xl font-semibold mb-4">Add a Vehicle</h2>
             <input
               type="text"
@@ -189,6 +232,32 @@ const AdminDashboard = () => {
               required
               className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
+            <input
+              type="number"
+              name="wheelCount"
+              placeholder="Wheel Count"
+              onChange={handleChange}
+              value={formData.wheelCount}
+              required
+              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <textarea
+              name="description"
+              placeholder="Description"
+              onChange={handleChange}
+              value={formData.description}
+              required
+              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <input
+              type="text"
+              name="features"
+              placeholder="Features (comma-separated)"
+              onChange={handleChange}
+              value={formData.features}
+              required
+              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
             <select
               name="available"
               onChange={handleChange}
@@ -206,7 +275,11 @@ const AdminDashboard = () => {
             </button>
           </form>
           {responseMessage && (
-            <Toast message={responseMessage} type={toastType} onClose={() => setResponseMessage("")} /> // Display the Toast notification
+            <Toast
+              message={responseMessage}
+              type={toastType}
+              onClose={() => setResponseMessage("")}
+            />
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {vehicles.map((vehicle) => (
