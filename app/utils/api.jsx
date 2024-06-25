@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/authContext';
 
 const API = axios.create({
-    baseURL: 'https://vehicle-rental-backend.vercel.app/api',
+    baseURL: 'http://127.0.0.1:8001/api',
 });
 
 API.interceptors.request.use((config) => {

@@ -1,17 +1,25 @@
-// components/VehicleCard.js
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { FaCar, FaMoneyBillWave, FaWheelchair, FaInfoCircle } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+import { FaCar, FaMoneyBillWave, FaWheelchair } from 'react-icons/fa';
 
 const VehicleCard = ({ vehicle }) => {
+  const router = useRouter();
+
   if (!vehicle) {
     return <div>Loading vehicle data...</div>;
   }
 
+  const handleCardClick = () => {
+    router.push(`/vehicle/${vehicle._id}`);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 hover:scale-105">
-      <div className="relative h-48 group">
+    <div 
+      className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 cursor-pointer"
+      onClick={handleCardClick}
+    >
+      <div className="relative h-48">
         <Image
           src={vehicle.image}
           alt={vehicle.name}
@@ -19,14 +27,6 @@ const VehicleCard = ({ vehicle }) => {
           objectFit="cover"
           className="transition-transform duration-300 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-300 flex items-center justify-center">
-          <Link href={`/vehicle/${vehicle._id}`} passHref>
-            <span className="bg-white text-gray-800 py-2 px-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer">
-              <FaInfoCircle className="inline-block mr-2" />
-              View Details
-            </span>
-          </Link> 
-        </div>
       </div>
       <div className="p-4">
         <h2 className="text-xl font-bold text-gray-800 mb-2">{vehicle.name}</h2>

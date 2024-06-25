@@ -6,6 +6,7 @@ import VehicleModal from "../components/VehicleModal";
 import VehicleCard from "../components/VehicleCard";
 import Toast from "../components/Toast";
 import { Oval } from "react-loader-spinner";
+import AddVehiclePanel from "../components/AddVehiclePanel";
 
 const AdminDashboard = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -18,6 +19,10 @@ const AdminDashboard = () => {
     wheelCount: "",
     description: "",
     features: "",
+    fuelType: "",
+    transmission: "",
+    capacity: "",
+    year: "",
   });
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,6 +31,16 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const { isLoggedIn, isAdmin } = useAuth();
+  const [isAddPanelVisible, setIsAddPanelVisible] = useState(false);
+
+  const vehicleTypes = [
+    'Sedan', 'Hatchback', 'Coupe', 'Convertible', 'SUV', 'Crossover SUV',
+    'Minivan', 'Pickup Truck', 'Van', 'Wagon', 'Sports Car', 'Luxury Car',
+    'Electric Vehicle', 'Hybrid', 'Motorcycle', 'Scooter', 'Bicycle'
+  ];
+  const fuelTypeOptions = ['petrol', 'diesel', 'electric', 'hybrid', 'plug-in hybrid'];
+  const transmissionOptions = ['manual', 'automatic', 'CVT', 'semi-automatic'];
+  const wheelCountOptions = [2, 3, 4, 6, 8];
 
   const fetchVehicles = async () => {
     try {
@@ -51,11 +66,15 @@ const AdminDashboard = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]:
-        name === "wheelCount" ? parseInt(value) :
-        name === "pricePerDay" ? parseFloat(value) :
-        name === "features" ? value.split(",").map((item) => item.trim()) :
-        name === "available" ? value === "true" :
-        value,
+        name === "wheelCount" || name === "capacity" || name === "year"
+          ? parseInt(value)
+          : name === "pricePerDay"
+          ? parseFloat(value)
+          : name === "features"
+          ? value.split(",").map((item) => item.trim())
+          : name === "available"
+          ? value === "true"
+          : value,
     }));
   };
 
@@ -87,8 +106,13 @@ const AdminDashboard = () => {
         wheelCount: "",
         description: "",
         features: "",
+        fuelType: "",
+        transmission: "",
+        capacity: "",
+        year: "",
       });
       fetchVehicles();
+      setIsAddPanelVisible(false);
     } catch (err) {
       console.error("Error adding vehicle:", err);
       setToastType("error");
@@ -106,10 +130,12 @@ const AdminDashboard = () => {
 
   const handleSave = async (updatedVehicle) => {
     if (!isLoggedIn || !isAdmin) {
-      console.error("You must be an authenticated admin to perform this action.");
+      console.error(
+        "You must be an authenticated admin to perform this action."
+      );
       return;
     }
-  
+
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -117,35 +143,39 @@ const AdminDashboard = () => {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       };
-      
-      // Prepare the vehicle data for update
+
       const vehicleToUpdate = {
         ...updatedVehicle,
-        features: Array.isArray(updatedVehicle.features) 
+        features: Array.isArray(updatedVehicle.features)
           ? updatedVehicle.features
-          : updatedVehicle.features.split(',').map(item => item.trim()),
-        available: updatedVehicle.available === "true" || updatedVehicle.available === true,
+          : updatedVehicle.features.split(",").map((item) => item.trim()),
+        available:
+          updatedVehicle.available === "true" ||
+          updatedVehicle.available === true,
         pricePerDay: Number(updatedVehicle.pricePerDay),
-        wheelCount: Number(updatedVehicle.wheelCount)
+        wheelCount: Number(updatedVehicle.wheelCount),
+        capacity: Number(updatedVehicle.capacity),
+        year: Number(updatedVehicle.year),
       };
-  
-      // Log the data being sent to the server
+
       console.log("Sending update:", vehicleToUpdate);
-  
-      const response = await API.put(`/vehicles/${updatedVehicle._id}`, vehicleToUpdate, {
-        headers,
-      });
-  
-      // Log the server response
+
+      const response = await API.put(
+        `/vehicles/${updatedVehicle._id}`,
+        vehicleToUpdate,
+        {
+          headers,
+        }
+      );
+
       console.log("Server response:", response.data);
-  
+
       setToastType("success");
       setResponseMessage("Vehicle updated successfully");
       setIsModalOpen(false);
       fetchVehicles();
     } catch (err) {
       console.error("Error updating vehicle:", err);
-      // Log more details about the error
       if (err.response) {
         console.error("Response data:", err.response.data);
         console.error("Response status:", err.response.status);
@@ -170,10 +200,16 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen text-white p-10">
+    <div className="min-h-screen text-white p-10 relative">
       <h1 className="text-4xl font-bold text-center mb-8 text-orange-500">
         Admin Dashboard
       </h1>
+      <button
+        onClick={() => setIsAddPanelVisible(true)}
+        className="fixed bottom-8 left-8 bg-orange-500 hover:bg-orange-400 text-white py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 z-10"
+      >
+        Add New Vehicle
+      </button>
       {isFetching ? (
         <div className="flex justify-center items-center h-64">
           <Oval
@@ -191,89 +227,18 @@ const AdminDashboard = () => {
         </div>
       ) : (
         <>
-          <form
+          <AddVehiclePanel
+            isVisible={isAddPanelVisible}
+            onClose={() => setIsAddPanelVisible(false)}
             onSubmit={handleSubmit}
-            className="bg-gray-800 p-12 rounded-lg shadow-lg max-w-lg mx-auto mb-8"
-          >
-            <h2 className="text-2xl font-semibold mb-4">Add a Vehicle</h2>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              onChange={handleChange}
-              value={formData.name}
-              required
-              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input
-              type="text"
-              name="type"
-              placeholder="Type"
-              onChange={handleChange}
-              value={formData.type}
-              required
-              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input
-              type="text"
-              name="image"
-              placeholder="Image URL"
-              onChange={handleChange}
-              value={formData.image}
-              required
-              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input
-              type="number"
-              name="pricePerDay"
-              placeholder="Price per day"
-              onChange={handleChange}
-              value={formData.pricePerDay}
-              required
-              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input
-              type="number"
-              name="wheelCount"
-              placeholder="Wheel Count"
-              onChange={handleChange}
-              value={formData.wheelCount}
-              required
-              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <textarea
-              name="description"
-              placeholder="Description"
-              onChange={handleChange}
-              value={formData.description}
-              required
-              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input
-              type="text"
-              name="features"
-              placeholder="Features (comma-separated)"
-              onChange={handleChange}
-              value={formData.features}
-              required
-              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <select
-              name="available"
-              onChange={handleChange}
-              value={formData.available}
-              className="w-full p-3 mb-6 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="true">Available</option>
-              <option value="false">Not Available</option>
-            </select>
-            <button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-400 text-white py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-            >
-              {loading ? "Adding..." : "Add Vehicle"}
-            </button>
-          </form>
+            formData={formData}
+            handleChange={handleChange}
+            loading={loading}
+            vehicleTypes={vehicleTypes}
+            fuelTypeOptions={fuelTypeOptions}
+            transmissionOptions={transmissionOptions}
+            wheelCountOptions={wheelCountOptions}
+          />
           {responseMessage && (
             <Toast
               message={responseMessage}
@@ -300,6 +265,10 @@ const AdminDashboard = () => {
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               onSave={handleSave}
+              vehicleTypes={vehicleTypes}
+              fuelTypeOptions={fuelTypeOptions}
+              transmissionOptions={transmissionOptions}
+              wheelCountOptions={wheelCountOptions}
             />
           )}
         </>

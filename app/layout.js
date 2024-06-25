@@ -8,7 +8,14 @@ export default function RootLayout({ children }) {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
+    // Retrieve theme from localStorage or default to 'light'
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+  }, []);
+
+  useEffect(() => {
     document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme); // Save theme to localStorage
   }, [theme]);
 
   return (

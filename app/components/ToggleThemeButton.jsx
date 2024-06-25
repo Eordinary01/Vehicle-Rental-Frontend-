@@ -1,3 +1,5 @@
+// ToggleThemeButton.js
+
 import { useEffect } from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa';
 
@@ -5,7 +7,7 @@ const ToggleThemeButton = ({ theme, setTheme }) => {
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    localStorage.setItem('theme', newTheme); // Store theme preference in local storage
   };
 
   useEffect(() => {

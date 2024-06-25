@@ -23,7 +23,8 @@ function Login() {
     setLoading(true);
     try {
       const response = await API.post('/auth/login', formData);
-      const { token, role } = response.data;
+      const { token, role, emailVerified } = response.data;
+      
       if (!token || !role) {
         console.error('Invalid response from the server:', response.data);
         setToastMessage('Error Logging In');
@@ -32,18 +33,24 @@ function Login() {
         setLoading(false);
         return;
       }
+      
       login(token, role);
-      setToastMessage('Login Successful!');
-      setToastType('success');
-      setShowToast(true);
-      setTimeout(() => {
-        setToastMessage('Redirecting to home page...');
+      
+      if (emailVerified) {
+        router.push('/');
+      } else {
+        setToastMessage('Login Successful!');
         setToastType('success');
         setShowToast(true);
         setTimeout(() => {
-          router.push('/');
+          setToastMessage('Redirecting to home page...');
+          setToastType('success');
+          setShowToast(true);
+          setTimeout(() => {
+            router.push('/');
+          }, 2000);
         }, 2000);
-      }, 2000);
+      }
     } catch (err) {
       console.error('Error during login:', err);
       if (err.response) {
