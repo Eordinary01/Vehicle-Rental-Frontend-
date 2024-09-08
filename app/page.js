@@ -169,7 +169,7 @@ export default function Home() {
               <FaTimes size={24} />
             </button>
           </div>
-          <div className="space-y-4">
+          <div className="space-y text-black">
             {renderSelect("type", filterOptions.types, "Vehicle Type")}
             {renderSelect("availability", filterOptions.availabilities.map(a => a.label), "Availability")}
             {renderSelect("priceRange", filterOptions.priceRanges.map(range => range.label), "Price Range")}
@@ -179,14 +179,14 @@ export default function Home() {
             {renderSelect("capacity", filterOptions.capacities, "Capacity")}
             {renderSelect("year", filterOptions.years, "Year")}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+              <label className="block text-sm font-medium text-black mb-1">Search</label>
               <input
                 type="text"
                 name="search"
                 value={filters.search}
                 onChange={handleFilterChange}
                 placeholder="Search vehicles..."
-                className="w-full p-2 rounded border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+                className="w-full p-2 rounded border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 text-black"
               />
             </div>
             <button

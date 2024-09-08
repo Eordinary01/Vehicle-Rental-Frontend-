@@ -1,34 +1,35 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import './globals.css';
-import { AuthProvider } from './context/authContext'; // Import AuthProvider
+import { AuthProvider, useAuth } from './context/authContext';
 
-export default function RootLayout({ children }) {
-  const [theme, setTheme] = useState('light');
-
-  useEffect(() => {
-    // Retrieve theme from localStorage or default to 'light'
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-  }, []);
+function Layout({ children }) {
+  const { theme, changeTheme } = useAuth();
 
   useEffect(() => {
-    document.body.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme); // Save theme to localStorage
+    document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  return (
+    <div className={`bg-${theme === 'light' ? 'white' : 'gray-900'} text-${theme === 'light' ? 'black' : 'white'}`}>
+      <header>
+        <Navbar theme={theme} setTheme={changeTheme} />
+      </header>
+      <main>{children}</main>
+    </div>
+  );
+}
+
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
         <title>Vehicle Rental</title>
       </head>
-      <body className={`bg-${theme === 'light' ? 'white' : 'gray-900'} text-${theme === 'light' ? 'black' : 'white'}`}>
-        <AuthProvider> {/* Wrap with AuthProvider */}
-          <header>
-            <Navbar theme={theme} setTheme={setTheme} />
-          </header>
-          <main>{children}</main>
+      <body>
+        <AuthProvider>
+          <Layout>{children}</Layout>
         </AuthProvider>
       </body>
     </html>

@@ -17,16 +17,19 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
-  const [theme, setTheme] = useState('light'); // Theme state
+  const [theme, setTheme] = useState('light');
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
-    const storedTheme = localStorage.getItem('theme'); // Retrieve theme from local storage
+    const storedTheme = localStorage.getItem('theme');
+    
     if (storedTheme) {
-      setTheme(storedTheme); // Set theme from local storage
+      setTheme(storedTheme);
+      document.documentElement.setAttribute('data-theme', storedTheme);
     }
+
     if (token) {
       try {
         const decodedToken = jwt.decode(token);
@@ -49,10 +52,11 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    document.body.setAttribute('data-theme', theme); // Set theme on body
-    localStorage.setItem('theme', theme); // Save theme to local storage
-  }, [theme]); // Update theme when it changes
+  const changeTheme = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
 
   const login = (token, role) => {
     try {
@@ -123,7 +127,7 @@ export const AuthProvider = ({ children }) => {
           strokeWidthSecondary={2}
         />
       </div>
-    ); // Or any loading component
+    );
   }
 
   return (
@@ -139,8 +143,8 @@ export const AuthProvider = ({ children }) => {
         toastMessage,
         showToast,
         setShowToast,
-        theme, // Provide theme to consumers
-        setTheme, // Provide setTheme to consumers
+        theme,
+        changeTheme,
       }}
     >
       {children}

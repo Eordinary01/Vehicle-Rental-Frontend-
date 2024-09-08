@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
+    "@heroicons/react": "^1.0.6",
     "@tailwindcss/forms": "^0.5.7",
     "axios": "^1.7.2",
     "framer-motion": "^11.2.11",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.439.0",
     "next": "14.2.4",
     "next-router-mock": "^0.9.13",
     "prop-types": "^15.8.1",
@@ -23,7 +25,9 @@
     "react-dom": "^18",
     "react-icons": "^5.2.1",
     "react-loader-spinner": "^6.1.6",
-    "react-router-dom": "^6.23.1"
+    "react-router-dom": "^6.23.1",
+    "react-tooltip": "^5.27.0",
+    "recharts": "^2.12.7"
   },
   "devDependencies": {
     "postcss": "^8",
