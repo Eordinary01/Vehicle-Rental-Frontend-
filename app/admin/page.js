@@ -201,12 +201,12 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen text-white p-10 relative">
-      <h1 className="text-4xl font-bold text-center mb-8 text-orange-500">
+      <h1 className="text-4xl font-bold text-center mb-8 text-[#3043bf]">
         Admin Dashboard
       </h1>
       <button
         onClick={() => setIsAddPanelVisible(true)}
-        className="fixed bottom-8 left-8 bg-orange-500 hover:bg-orange-400 text-white py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 z-10"
+        className="fixed bottom-8 left-8 bg-[#3043bf] hover:bg-orange-400 text-white py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 z-10"
       >
         Add New Vehicle
       </button>
@@ -252,7 +252,7 @@ const AdminDashboard = () => {
                 <VehicleCard vehicle={vehicle} />
                 <button
                   onClick={() => handleUpdate(vehicle)}
-                  className="absolute top-0 right-0 mt-2 mr-2 bg-orange-600 hover:bg-orange-400 text-white py-1 px-2 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                  className="absolute top-0 right-0 mt-2 mr-2 bg-[#3043bf] hover:bg-orange-400 text-white py-1 px-2 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                 >
                   Edit
                 </button>
